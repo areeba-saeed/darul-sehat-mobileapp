@@ -121,9 +121,6 @@ const Login = ({ navigation }) => {
           )}
         </TouchableOpacity>
       </View>
-      <TouchableOpacity>
-        <Text style={styles.forgot_button}>Forgot Password?</Text>
-      </TouchableOpacity>
       <View style={{ flexDirection: "row" }}>
         <Text>Create Account</Text>
         <TouchableOpacity

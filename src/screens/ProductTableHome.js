@@ -34,7 +34,6 @@ const ProductTableHome = ({ navigation }) => {
         style={{ height: windowHeight - 570 }}
         scrollEnabled={false}
         renderItem={({ item }) => {
-          console.log(item.images[0]);
           return (
             <View style={styles.categoryItems} key={item._id}>
               <TouchableOpacity

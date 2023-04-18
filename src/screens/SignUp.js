@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   Platform,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
@@ -245,6 +244,91 @@ const Signup = ({ navigation }) => {
             onChangeText={(password2) => setPassword2(password2)}
           />
         </View>
+        <View style={{ width: "80%" }}>
+          {/*Search Country*/}
+          <View>
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setOpenCountry(!openCountry)}>
+              {country === "" ? (
+                <View>
+                  <Text>Select a country</Text>
+                </View>
+              ) : (
+                <Text>{country}</Text>
+              )}
+              {openCountry ? (
+                <AntDesign name="up" size={15} />
+              ) : (
+                <AntDesign name="down" size={15} />
+              )}
+            </TouchableOpacity>
+
+            {openCountry ? (
+              <View style={styles.opendropdown}>
+                <ScrollView nestedScrollEnabled={true}>
+                  {countryItems.map((row, index) => {
+                    return (
+                      <TouchableOpacity
+                        activeOpacity={1}
+                        style={{ padding: 15 }}
+                        key={index}
+                        onPress={() => {
+                          setOpenCountry(false);
+                          setCountry(row.name);
+                          setCityItems(row.cities);
+                          setCity("");
+                        }}>
+                        <Text>{row.name}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            ) : (
+              ""
+            )}
+          </View>
+          {/*Search City*/}
+          <View>
+            {country !== "" ? (
+              <TouchableOpacity
+                style={styles.dropdown}
+                onPress={() => setOpenCity(!openCity)}>
+                {city === "" ? <Text>Select a city</Text> : <Text>{city}</Text>}
+                {openCity ? (
+                  <AntDesign name="up" size={15} />
+                ) : (
+                  <AntDesign name="down" size={15} />
+                )}
+              </TouchableOpacity>
+            ) : (
+              ""
+            )}
+            {openCity ? (
+              <View style={styles.opendropdown}>
+                <ScrollView nestedScrollEnabled={true}>
+                  {cityItems.map((row, index) => {
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        activeOpacity={1}
+                        style={{ padding: 15 }}
+                        onPress={() => {
+                          setOpenCity(false);
+                          setCity(row);
+                        }}>
+                        <Text>{row}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            ) : (
+              ""
+            )}
+          </View>
+        </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text>Doctor? </Text>
           <Checkbox
@@ -268,104 +352,16 @@ const Signup = ({ navigation }) => {
             <View style={styles.inputDoctor}>
               <TextInput
                 style={styles.TextInput}
-                placeholder="Address"
+                placeholder="Residential Address"
                 value={address}
                 placeholderTextColor="#003f5c"
                 onChangeText={(address) => setAddress(address)}
               />
             </View>
-            {/*Search Country*/}
-            <View>
-              <TouchableOpacity
-                style={styles.dropdown}
-                onPress={() => setOpenCountry(!openCountry)}>
-                {country === "" ? (
-                  <View>
-                    <Text>Select a country</Text>
-                  </View>
-                ) : (
-                  <Text>{country}</Text>
-                )}
-                {openCountry ? (
-                  <AntDesign name="up" size={15} />
-                ) : (
-                  <AntDesign name="down" size={15} />
-                )}
-              </TouchableOpacity>
-
-              {openCountry ? (
-                <View style={styles.opendropdown}>
-                  <ScrollView nestedScrollEnabled={true}>
-                    {countryItems.map((row, index) => {
-                      return (
-                        <TouchableOpacity
-                          activeOpacity={1}
-                          style={{ padding: 15 }}
-                          key={index}
-                          onPress={() => {
-                            setOpenCountry(false);
-                            setCountry(row.name);
-                            setCityItems(row.cities);
-                            setCity("");
-                          }}>
-                          <Text>{row.name}</Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-              ) : (
-                ""
-              )}
-            </View>
-            {/*Search City*/}
-            <View>
-              {country !== "" ? (
-                <TouchableOpacity
-                  style={styles.dropdown}
-                  onPress={() => setOpenCity(!openCity)}>
-                  {city === "" ? (
-                    <Text>Select a city</Text>
-                  ) : (
-                    <Text>{city}</Text>
-                  )}
-                  {openCity ? (
-                    <AntDesign name="up" size={15} />
-                  ) : (
-                    <AntDesign name="down" size={15} />
-                  )}
-                </TouchableOpacity>
-              ) : (
-                ""
-              )}
-              {openCity ? (
-                <View style={styles.opendropdown}>
-                  <ScrollView nestedScrollEnabled={true}>
-                    {cityItems.map((row, index) => {
-                      return (
-                        <TouchableOpacity
-                          key={index}
-                          activeOpacity={1}
-                          style={{ padding: 15 }}
-                          onPress={() => {
-                            setOpenCity(false);
-                            setCity(row);
-                          }}>
-                          <Text>{row}</Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-              ) : (
-                ""
-              )}
-            </View>
-
             <View style={styles.inputDoctor}>
               <TextInput
                 style={styles.TextInput}
-                placeholder="Work Place Name"
+                placeholder="Clinical Address"
                 value={workPlaceName}
                 placeholderTextColor="#003f5c"
                 onChangeText={(workPlaceName) =>

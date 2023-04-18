@@ -46,7 +46,7 @@ const CategoryTable = ({ navigation, visible, height }) => {
         data={filteredData}
         keyExtractor={(item) => item._id}
         numColumns={3}
-        style={{  height: height }}
+        style={{ height: height }}
         scrollEnabled={visible}
         showsVerticalScrollIndicator={visible}
         renderItem={({ item }) => {

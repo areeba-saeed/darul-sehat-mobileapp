@@ -25,6 +25,7 @@ const Account = () => {
   const [city, setCity] = useState(null);
   const [userId, setUserId] = useState();
 
+
   useFocusEffect(
     React.useCallback(() => {
       const checkToken = async () => {
@@ -41,16 +42,18 @@ const Account = () => {
         }
       };
       checkToken();
-      axios
-        .get(`http://192.168.100.22:5000/user1/${userId}`)
-        .then((response) => {
-          setDoctor(response.data.doctor);
-          setName(response.data.name);
-          setAddress(response.data.address);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (userId) {
+        axios
+          .get(`http://192.168.100.22:5000/user1/${userId}`)
+          .then((response) => {
+            setDoctor(response.data.doctor);
+            setName(response.data.name);
+            setAddress(response.data.address);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }, [userId])
   );
 

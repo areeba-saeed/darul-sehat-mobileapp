@@ -50,7 +50,7 @@ const StackNavigation = () => {
       initialRouteName={tokenAvailable === true ? "MyDrawer" : "Login"}
       screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MyDrawer" component={MyDrawer} />
-      {/*   <Stack.Screen name="Notification" component={Notification} /> */}
+      <Stack.Screen name="Notification" component={Notification} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="Signup" component={Signup} />

@@ -8,11 +8,9 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import CategoryTable from "../components/CategoryTable";
-import ProductTable from "../components/ProductTable";
 import { windowHeight } from "../components/Dimensions";
 import { SliderBox } from "react-native-image-slider-box";
 import axios from "axios";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
@@ -27,9 +25,6 @@ const Home = ({ navigation, route }) => {
   const [username, setUsername] = useState("");
   const dispatch = useDispatch();
   const [userId, setUserId] = useState();
-  const user1 = parseInt(useSelector(selectUserId));
-
-  console.log(user1);
 
   useEffect(() => {
     axios
@@ -59,29 +54,29 @@ const Home = ({ navigation, route }) => {
           const token = await AsyncStorage.getItem("token");
           if (token !== null) {
             setUserId(JSON.parse(token));
-            console.log(token);
           } else {
             console.log("Token not found");
-            setUserId(parseInt(useSelector(selectUserId)));
+            setUserId(useSelector(selectUserId));
           }
         } catch (error) {
           console.log(error);
         }
       };
       checkToken();
-      axios
-        .get(`http://192.168.100.22:5000/user1/${userId}`)
-        .then((response) => {
-          setUsername(response.data.name);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (userId) {
+        axios
+          .get(`http://192.168.100.22:5000/user1/${userId}`)
+          .then((response) => {
+            setUsername(response.data.name);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }, [userId])
   );
   const handleBannerPress = (index) => {
     const medicineData = allMedicines[index];
-    console.log(medicineData.name);
     navigation.navigate("Product1", { data: medicineData });
   };
 

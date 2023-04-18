@@ -13,7 +13,6 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 
 const Item = ({ data, navigation }) => {
-  console.log(data.symptoms);
   const image = data.images[0];
   return (
     <View style={styles.productItem}>
@@ -34,8 +33,10 @@ const Item = ({ data, navigation }) => {
         <Text style={styles.itemName}>{data.name}</Text>
         <Text style={styles.categoryName}>{data.category}</Text>
         <View>
-          {data.symptoms.map((row) => (
-            <Text style={styles.categoryName}>{row.name}</Text>
+          {data.symptoms.map((row, index) => (
+            <Text style={styles.categoryName} key={index}>
+              {row.name}
+            </Text>
           ))}
         </View>
       </View>
@@ -111,8 +112,10 @@ const Genre1 = ({ navigation, route }) => {
 
             <FlatList
               data={filteredData}
-              renderItem={(item) => {
-                return <Item data={item.item} navigation={navigation} />;
+              renderItem={(item, index) => {
+                return (
+                  <Item data={item.item} navigation={navigation} key={index} />
+                );
               }}
               keyExtractor={(item) => item.id}
               numColumns={1}
