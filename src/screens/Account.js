@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Button,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -16,53 +17,47 @@ import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Account = () => {
-  const [modalName, setNameModal] = useState(false);
-  const [modalAddress, setAddressModal] = useState(false);
   const [name, setName] = useState("");
-  const [isDoctor, setDoctor] = useState(true);
-  const [province, setProvince] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState(null);
-  const [userId, setUserId] = useState();
+  const [age, setAge] = useState();
+  const [gender, setGender] = useState("");
+  const [fees, setFees] = useState("");
+  const [doctorId, setDoctorId] = useState("");
+  const [token, setToken] = useState();
 
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const checkToken = async () => {
-        try {
-          const token = await AsyncStorage.getItem("token");
-          if (token !== null) {
-            setUserId(JSON.parse(token));
-          } else {
-            console.log("Token not found");
-            setUserId(useSelector(selectUserId));
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      checkToken();
-      if (userId) {
-        axios
-          .get(`http://192.168.100.22:5000/user1/${userId}`)
-          .then((response) => {
-            setDoctor(response.data.doctor);
-            setName(response.data.name);
-            setAddress(response.data.address);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+  useEffect(() => {
+    AsyncStorage.getItem("id")
+      .then((id) => {
+        const parsedId = JSON.parse(id);
+        setDoctorId(parsedId);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    const getToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const parseToken = JSON.parse(token);
+        setToken(parseToken);
+      } catch (error) {
+        console.log(error);
       }
-    }, [userId])
-  );
+    };
 
-  const handleName = () => {
+    getToken();
+  }, [doctorId]);
+
+  useEffect(() => {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
     axios
-      .put(`http://192.168.100.22:5000/user1/${userId}`, { name: name })
+      .get(`http://192.168.100.22:5000/api/v1/user1/find/${doctorId}`, config)
       .then((response) => {
-        console.log(response.data.name);
-        setNameModal(false);
+        setName(response.data.name);
+        setGender(response.data.gender);
+        setFees(response.data.fees);
       })
       .catch((error) => {
         if (error.response) {
@@ -79,97 +74,53 @@ const Account = () => {
           console.log("Error", error.message);
         }
       });
-  };
+  }, [token]);
 
-  const handleAddress = () => {
+  const handleUpdate = () => {
+    const data = {
+      name: name,
+      age: parseInt(age),
+      gender: gender,
+      fees: fees,
+    };
     axios
-      .put(`http://192.168.100.22:5000/user1/${userId}`, { address: address })
+      .patch(
+        `http://192.168.100.22:5000/api/v1/user1/update/${doctorId}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
       .then((response) => {
-        console.log(response.data);
+        setName(response.data.name);
+        setGender(response.data.gender);
       })
       .catch((error) => {
         console.log(error);
       });
-    setAddressModal(false);
   };
   return (
     <View style={styles.container}>
       <ScrollView>
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={{ position: "absolute", right: 10, top: 10, zIndex: 1 }}
-            onPress={() => {
-              setNameModal(!modalName);
-            }}>
-            <Icon name="pencil-box" color="black" size={25} />
-          </TouchableOpacity>
-          <Text style={{ marginBottom: 10, fontSize: 15 }}>Name</Text>
-          <Text style={{ fontWeight: "500", fontSize: 18 }}>{name}</Text>
-
-          {modalName ? (
-            <View style={styles.rowWrapper}>
-              <Text style={{ marginBottom: 10, fontSize: 15 }}>New Name</Text>
-              <View style={styles.inputView}>
-                <TextInput
-                  style={styles.TextInput}
-                  placeholderTextColor="#003f5c"
-                  value={name}
-                  onChangeText={(value) => {
-                    setName(value);
-                  }}
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.loginBtn}
-                onPress={() => {
-                  handleName();
-                }}>
-                <Text style={styles.loginText}>Update</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
-        </View>
-        {isDoctor ? (
-          <View>
-            {/*Address*/}
-
-            <View style={styles.row}>
-              <TouchableOpacity
-                style={{ position: "absolute", right: 10, top: 10, zIndex: 1 }}
-                onPress={() => {
-                  setAddressModal(!modalAddress);
-                }}>
-                <Icon name="pencil-box" color="black" size={25} />
-              </TouchableOpacity>
-              <Text style={{ marginBottom: 10, fontSize: 15 }}>Address</Text>
-              <Text style={{ fontWeight: "500", fontSize: 18 }}>{address}</Text>
-
-              {modalAddress ? (
-                <View style={styles.rowWrapper}>
-                  <View style={styles.inputView}>
-                    <TextInput
-                      style={styles.TextInput}
-                      placeholderTextColor="#003f5c"
-                      value={address}
-                      onChangeText={(value) => {
-                        setAddress(value);
-                      }}
-                    />
-                  </View>
-                  <TouchableOpacity
-                    style={styles.loginBtn}
-                    onPress={() => {
-                      handleAddress();
-                    }}>
-                    <Text style={styles.loginText}>Update</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-            </View>
-          </View>
-        ) : (
-          ""
-        )}
+        <Text>Name</Text>
+        <TextInput
+          value={name}
+          style={styles.input}
+          onChangeText={(name) => setName(name)}
+        />
+        <Text>Age</Text>
+        <TextInput value={age} style={styles.input} onChangeText={setAge} />
+        <Text>Gender</Text>
+        <TextInput
+          value={gender}
+          style={styles.input}
+          onChangeText={setGender}
+        />
+        <Text>Fees</Text>
+        <TextInput value={fees} style={styles.input} onChangeText={setFees} />
+        <Button title="Update" onPress={() => handleUpdate()} />
       </ScrollView>
     </View>
   );
@@ -269,6 +220,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     borderWidth: 0,
+  },
+  input: {
+    height: 40,
+    width: "80%",
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
   },
 });
 export default Account;

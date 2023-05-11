@@ -15,36 +15,46 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUserId, setUserId } from "../reducer/index";
 
 const Login = ({ navigation }) => {
-  const [phoneNo, setPhoneNo] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
   const [errorMessageshow, setErrorMessageShow] = useState();
-  const [userId, setuserId] = useState();
   const dispatch = useDispatch();
 
   const handleLogin = () => {
     const users = {
-      phoneNo: phoneNo,
+      email: email,
       password: password,
     };
     axios
-      .post("http://192.168.100.22:5000/user1/login", users)
+      .post("http://192.168.100.22:5000/api/v1/user1/login", users, {
+        withCredentials: true,
+      })
       .then((response) => {
         const { token } = response.data;
-        // Decode JWT token to get user ID
-        const decoded = jwtDecode(token);
-        const userId = decoded.userId;
-
-        setPhoneNo("");
+        const { user } = response.data;
+        const { role } = user;
+        const { _id } = user;
+        console.log("success");
+        // // Decode JWT token to get user ID
+        AsyncStorage.setItem("role", JSON.stringify(role));
+        AsyncStorage.setItem("id", JSON.stringify(_id));
+        setEmail("");
         setPassword("");
-        AsyncStorage.setItem("token", JSON.stringify(userId));
-        dispatch(setUserId(userId));
+        AsyncStorage.setItem("token", JSON.stringify(token));
+        // dispatch(setUserId(userId));
         setErrorMessage(false);
         setErrorMessageShow("");
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        navigation.navigate("MyDrawer");
-        // Pass user ID to next screen
+        if (role === "patient") {
+          navigation.navigate("MyDrawer");
+        } else if (role === "doctor") {
+          navigation.navigate("DoctorDrawer");
+        } else {
+          setErrorMessage("Cannot login");
+          setErrorMessageShow(true);
+        }
+
         // Handle successful login
       })
       .catch((error) => {
@@ -64,6 +74,7 @@ const Login = ({ navigation }) => {
           // Something happened in setting up the request that triggered an Error
           console.log("Error", error.message);
         }
+        console.log(error);
       });
   };
 
@@ -89,13 +100,13 @@ const Login = ({ navigation }) => {
       <View style={styles.inputView}>
         <TextInput
           style={styles.TextInput}
-          value={phoneNo}
+          value={email}
           placeholder="Phone No."
           placeholderTextColor="#9FA5C0"
           autoCapitalize="none"
-          autoCompleteType="phoneNo"
-          textContentType="phoneNo"
-          onChangeText={(phoneNo) => setPhoneNo(phoneNo)}
+          autoCompleteType="email"
+          textContentType="email"
+          onChangeText={(email) => setEmail(email)}
         />
       </View>
 
@@ -126,7 +137,7 @@ const Login = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("Signup");
-            setPhoneNo("");
+            setEmail("");
             setPassword("");
             setErrorMessage(false);
             setErrorMessageShow("");

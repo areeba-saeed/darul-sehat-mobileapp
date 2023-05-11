@@ -64,25 +64,21 @@ const Signup = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [email, setEmail] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [phoneNo, setPhoneNo] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isDoctor, setDoctor] = useState(false);
-  const [workPlaceName, setWorkPlaceName] = useState("");
   const [city, setCity] = useState("");
-  const [openCity, setOpenCity] = useState(false);
-  const [cityItems, setCityItems] = useState([]);
-  const [country, setCountry] = useState("");
-  const [openCountry, setOpenCountry] = useState(false);
-  const [countryItems, setCountryItems] = useState([]);
+  const [zip, setZip] = useState("");
+  const [street, setStreet] = useState("");
+  const [state, setState] = useState("");
   const [errorShow, setErrorShow] = useState(false);
   const [deviceToken, setDeviceToken] = useState("");
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) => {
@@ -107,17 +103,6 @@ const Signup = ({ navigation }) => {
     };
   }, []);
 
-  useEffect(() => {
-    axios
-      .get(`http://192.168.100.22:5000/countries`)
-      .then((response) => {
-        setCountryItems(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-
   const randomString1 = uid();
   const randomString2 = uid();
 
@@ -135,25 +120,46 @@ const Signup = ({ navigation }) => {
       name: name,
       password: password,
       password2: password2,
-      doctor: isDoctor,
-      city: city,
-      country: country,
-      workPlaceName: workPlaceName,
-      address: address,
-      userId: userId,
-      doctorId: randomDoctorId,
-      emai: email,
+      age: parseInt(age),
+      email: email,
       phoneNo: phoneNo,
+      zip: zip,
       deviceToken: deviceToken,
+      city: city,
+      street: street,
+      state: state,
+      gender: gender,
     };
     axios
-      .post(`http://192.168.100.22:5000/user1/register`, user)
+      .post(`http://192.168.100.22:5000/api/v1/user1/register`, user, {
+        withCredentials: true,
+      })
       .then((response) => {
         console.log(response.data);
-        dispatch(setUserId(userId));
-        AsyncStorage.setItem("token", JSON.stringify(userId));
-        navigation.navigate("MyDrawer");
+        const { token } = response.data;
+        const { user } = response.data;
+        const id = user._id;
+
+        // // Decode JWT token to get user ID
+        AsyncStorage.setItem("role", "patient");
+        AsyncStorage.setItem("id", JSON.stringify(id));
+        AsyncStorage.setItem("token", JSON.stringify(token));
+        setName("");
+        setAge("");
+        setGender("");
+        setEmail("");
+        setPhoneNo("");
+        setZip("");
+        setStreet("");
+        setState("");
+        setCity("");
+        setPassword("");
+        setPassword2("");
+        // dispatch(setUserId(userId));
+        setErrorMessage("");
         setErrorShow(false);
+
+        navigation.navigate("MyDrawer");
       })
       .catch((error) => {
         if (error.response) {
@@ -195,7 +201,6 @@ const Signup = ({ navigation }) => {
             <Text style={styles.login}>Login</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.inputView}>
           <TextInput
             style={styles.TextInput}
@@ -205,7 +210,6 @@ const Signup = ({ navigation }) => {
             onChangeText={(name) => setName(name)}
           />
         </View>
-
         <View style={styles.inputView}>
           <TextInput
             style={styles.TextInput}
@@ -214,6 +218,84 @@ const Signup = ({ navigation }) => {
             placeholderTextColor="#003f5c"
             onChangeText={(phoneNo) => setPhoneNo(phoneNo)}
           />
+        </View>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Email"
+              value={email}
+              placeholderTextColor="#003f5c"
+              onChangeText={(email) => setEmail(email)}
+            />
+          </View>
+        </View>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Age"
+              value={age}
+              placeholderTextColor="#003f5c"
+              onChangeText={(age) => setAge(age)}
+            />
+          </View>
+        </View>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Gender"
+              value={gender}
+              placeholderTextColor="#003f5c"
+              onChangeText={(gender) => setGender(gender)}
+            />
+          </View>
+        </View>
+        <Text style={{ fontSize: 25 }}>Address</Text>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Zip"
+              value={zip}
+              placeholderTextColor="#003f5c"
+              onChangeText={(zip) => setZip(zip)}
+            />
+          </View>
+        </View>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Street"
+              value={street}
+              placeholderTextColor="#003f5c"
+              onChangeText={(street) => setStreet(street)}
+            />
+          </View>
+        </View>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="City"
+              value={city}
+              placeholderTextColor="#003f5c"
+              onChangeText={(city) => setCity(city)}
+            />
+          </View>
+        </View>
+        <View style={{ width: "80%" }}>
+          <View style={styles.inputDoctor}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="State"
+              value={state}
+              placeholderTextColor="#003f5c"
+              onChangeText={(state) => setState(state)}
+            />
+          </View>
         </View>
         <View style={styles.inputView}>
           <TextInput
@@ -244,135 +326,6 @@ const Signup = ({ navigation }) => {
             onChangeText={(password2) => setPassword2(password2)}
           />
         </View>
-        <View style={{ width: "80%" }}>
-          {/*Search Country*/}
-          <View>
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => setOpenCountry(!openCountry)}>
-              {country === "" ? (
-                <View>
-                  <Text>Select a country</Text>
-                </View>
-              ) : (
-                <Text>{country}</Text>
-              )}
-              {openCountry ? (
-                <AntDesign name="up" size={15} />
-              ) : (
-                <AntDesign name="down" size={15} />
-              )}
-            </TouchableOpacity>
-
-            {openCountry ? (
-              <View style={styles.opendropdown}>
-                <ScrollView nestedScrollEnabled={true}>
-                  {countryItems.map((row, index) => {
-                    return (
-                      <TouchableOpacity
-                        activeOpacity={1}
-                        style={{ padding: 15 }}
-                        key={index}
-                        onPress={() => {
-                          setOpenCountry(false);
-                          setCountry(row.name);
-                          setCityItems(row.cities);
-                          setCity("");
-                        }}>
-                        <Text>{row.name}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            ) : (
-              ""
-            )}
-          </View>
-          {/*Search City*/}
-          <View>
-            {country !== "" ? (
-              <TouchableOpacity
-                style={styles.dropdown}
-                onPress={() => setOpenCity(!openCity)}>
-                {city === "" ? <Text>Select a city</Text> : <Text>{city}</Text>}
-                {openCity ? (
-                  <AntDesign name="up" size={15} />
-                ) : (
-                  <AntDesign name="down" size={15} />
-                )}
-              </TouchableOpacity>
-            ) : (
-              ""
-            )}
-            {openCity ? (
-              <View style={styles.opendropdown}>
-                <ScrollView nestedScrollEnabled={true}>
-                  {cityItems.map((row, index) => {
-                    return (
-                      <TouchableOpacity
-                        key={index}
-                        activeOpacity={1}
-                        style={{ padding: 15 }}
-                        onPress={() => {
-                          setOpenCity(false);
-                          setCity(row);
-                        }}>
-                        <Text>{row}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            ) : (
-              ""
-            )}
-          </View>
-        </View>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text>Doctor? </Text>
-          <Checkbox
-            style={styles.checkbox}
-            value={isDoctor}
-            onValueChange={setDoctor}
-            color="blue"
-          />
-        </View>
-        {isDoctor ? (
-          <View style={{ width: "80%" }}>
-            <View style={styles.inputDoctor}>
-              <TextInput
-                style={styles.TextInput}
-                placeholder="Email"
-                value={email}
-                placeholderTextColor="#003f5c"
-                onChangeText={(email) => setEmail(email)}
-              />
-            </View>
-            <View style={styles.inputDoctor}>
-              <TextInput
-                style={styles.TextInput}
-                placeholder="Residential Address"
-                value={address}
-                placeholderTextColor="#003f5c"
-                onChangeText={(address) => setAddress(address)}
-              />
-            </View>
-            <View style={styles.inputDoctor}>
-              <TextInput
-                style={styles.TextInput}
-                placeholder="Clinical Address"
-                value={workPlaceName}
-                placeholderTextColor="#003f5c"
-                onChangeText={(workPlaceName) =>
-                  setWorkPlaceName(workPlaceName)
-                }
-              />
-            </View>
-          </View>
-        ) : (
-          ""
-        )}
         {errorShow ? (
           <Text style={{ color: "red", marginBottom: 10 }}>{errorMessage}</Text>
         ) : (

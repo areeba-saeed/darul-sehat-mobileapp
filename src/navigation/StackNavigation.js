@@ -1,11 +1,6 @@
 import * as React from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Categories from "../screens/Categories";
-import Products from "../screens/Products";
-import Product1 from "../screens/Product1";
-import Category1 from "../screens/Category1";
 import Login from "../screens/Login";
 import Signup from "../screens/SignUp";
 import Account from "../screens/Account";
@@ -14,7 +9,8 @@ import Otp from "../screens/Otp.js";
 import MyDrawer from "./Drawer";
 import Password from "../screens/Password";
 import Notification from "../screens/Notification";
-import Genre1 from "../screens/Genre1";
+import Doctor1 from "../screens/Doctor1";
+import DoctorDrawer from "./DoctorDrawer";
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +18,19 @@ const Stack = createNativeStackNavigator();
 const StackNavigation = () => {
   const [tokenAvailable, setTokenAvailable] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [role, setRole] = React.useState("");
+
+  console.log(role);
+
   React.useEffect(() => {
+    AsyncStorage.getItem("role")
+      .then((role) => {
+        const parsedRole = JSON.parse(role);
+        setRole(parsedRole);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -45,21 +53,28 @@ const StackNavigation = () => {
     return null; // or render a loading indicator
   }
 
+  let initialRouteName = "Login";
+
+  if (tokenAvailable) {
+    if (role === "patient") {
+      initialRouteName = "MyDrawer";
+    } else if (role === "doctor") {
+      initialRouteName = "DoctorDrawer";
+    }
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName={tokenAvailable === true ? "MyDrawer" : "Login"}
+      initialRouteName={initialRouteName}
       screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MyDrawer" component={MyDrawer} />
       <Stack.Screen name="Notification" component={Notification} />
+      <Stack.Screen name="DoctorDrawer" component={DoctorDrawer} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="Signup" component={Signup} />
-      <Stack.Screen name="Categories" component={Categories} />
-      <Stack.Screen name="Products" component={Products} />
+      <Stack.Screen name="Doctor1" component={Doctor1} />
       <Stack.Screen name="Password" component={Password} />
-      <Stack.Screen name="Product1" component={Product1} />
-      <Stack.Screen name="Category1" component={Category1} />
-      <Stack.Screen name="Genre1" component={Genre1} />
       <Stack.Screen name="Account" component={Account} />
       <Stack.Screen name="Terms" component={Terms} />
     </Stack.Navigator>

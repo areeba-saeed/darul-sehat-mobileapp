@@ -13,25 +13,22 @@ import AllAppointments from "../screens/AllAppointments";
 import AllLabOrders from "../screens/AllLabOrders";
 import AllPharmacyHistory from "../screens/AllPharmacyHistory";
 import Booking from "../screens/Booking";
+import DoctorHome from "../screens/DoctorHome";
+import DoctorAllBookings from "../screens/DoctorAllBookings";
+import DoctorToday from "../screens/DoctorToday";
 
 const Drawer = createDrawerNavigator();
 
-function MyDrawer() {
+function DoctorDrawer() {
   return (
     <Drawer.Navigator initialRouteName="Home">
-      <Drawer.Screen name="Home" component={Home} />
+      <Drawer.Screen name="DoctorHome" component={DoctorHome} />
+      <Drawer.Screen name="DoctorAllBookings" component={DoctorAllBookings} />
+      <Drawer.Screen name="DoctorToday" component={DoctorToday} />
       <Drawer.Screen name="Profile" component={Account} />
       <Drawer.Screen name="Password" component={Password} />
       <Drawer.Screen name="Terms&Conditions" component={Terms} />
-      <Drawer.Screen name="LabTestBook" component={LabTestBook} />
-      <Drawer.Screen name="BookAppointment" component={BookAppointment} />
-      <Drawer.Screen name="Booking" component={Booking} />
-      <Drawer.Screen name="SearchDoctor" component={SearchDoctor} />
-      <Drawer.Screen name="Pharmacy" component={Pharmacy} />
-      <Drawer.Screen name="AllAppointments" component={AllAppointments} />
-      <Drawer.Screen name="AllLabOrders" component={AllLabOrders} />
-      <Drawer.Screen name="AllPharmacyHistory" component={AllPharmacyHistory} />
     </Drawer.Navigator>
   );
 }
-export default MyDrawer;
+export default DoctorDrawer;

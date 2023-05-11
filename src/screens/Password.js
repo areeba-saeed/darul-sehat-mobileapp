@@ -10,49 +10,61 @@ import {
 import React, { useState } from "react";
 
 import axios from "axios";
-import { useSelector } from "react-redux";
-import { selectUserId } from "../reducer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const Password = () => {
-  const [oldpassword, setOldpassword] = useState("");
+  const [oldpassword, setCurrentpassword] = useState("");
   const [password, setpassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordUpdate, setPasswordUpdate] = useState(false);
   const [message, setMessage] = useState(false);
-  const [userId, setUserId] = useState();
+  const [patientId, setPatientId] = useState("");
+  const [token, setToken] = useState();
 
   useFocusEffect(
     React.useCallback(() => {
-      const checkToken = async () => {
+      AsyncStorage.getItem("id")
+        .then((id) => {
+          const parsedId = JSON.parse(id);
+          setPatientId(parsedId);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      const getToken = async () => {
         try {
           const token = await AsyncStorage.getItem("token");
-          if (token !== null) {
-            setUserId(JSON.parse(token));
-          } else {
-            console.log("Token not found");
-            setUserId(useSelector(selectUserId));
-          }
+          const parseToken = JSON.parse(token);
+          setToken(parseToken);
         } catch (error) {
           console.log(error);
         }
       };
-      checkToken();
-    }, [userId])
-  );
 
+      getToken();
+    }, [patientId, token])
+  );
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   const handleChange = () => {
     axios
-      .put(`http://192.168.100.22:5000/user1/${userId}`, {
-        oldpassword: oldpassword,
-        password: password,
-      })
+      .patch(
+        `http://192.168.100.22:5000/api/v1/user1/update/${patientId}`,
+        {
+          password: password,
+          oldpassword: oldpassword,
+        },
+        config
+      )
       .then((response) => {
         console.log(response.data);
         setMessage(false);
         setpassword("");
-        setOldpassword("");
+        setCurrentpassword("");
         setPasswordUpdate(true);
         setTimeout(() => {
           setPasswordUpdate(false);
@@ -60,20 +72,11 @@ const Password = () => {
       })
       .catch((error) => {
         if (error.response) {
-          // The request was made and the server responded with a status code
+          console.log(error.response);
           setMessage(true);
           setErrorMessage(error.response.data);
-          // setErrorMessage(error.response.data);
-          console.log(error.response.data);
-          // that falls out of the range of 2xx
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(error.request);
         } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log("Error", error.message);
+          console.log(error);
         }
       });
   };
@@ -94,7 +97,7 @@ const Password = () => {
           placeholderTextColor="#003f5c"
           value={oldpassword}
           onChangeText={(value) => {
-            setOldpassword(value);
+            setCurrentpassword(value);
           }}
         />
       </View>

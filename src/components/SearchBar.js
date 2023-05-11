@@ -26,7 +26,7 @@ const SearchBar = (props) => {
       <TextInput
         autoFocus={false}
         ref={textInputRef}
-        placeholder="Search by name, genre, category or symptoms"
+        placeholder="Search by name or speciality"
         onChangeText={(text) => props.setSearchQuery(text)}
         value={props.searchQuery}
         style={styles.input}

@@ -1,34 +1,32 @@
 import {
   View,
   Text,
-  TextInput,
-  StyleSheet,
+  Button,
   TouchableOpacity,
-  ScrollView,
+  StyleSheet,
   Image,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-
-import axios from "axios";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
-import { clearUserId, selectUserId } from "../reducer/index";
+import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
 
-const Home = ({ navigation, route }) => {
-  const dispatch = useDispatch();
+const DoctorHome = ({ navigation }) => {
   const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
   const [token, setToken] = useState();
-  const [patientId, setPatientId] = useState("");
+  const [doctorId, setDoctorId] = useState("");
+  const [email, setEmail] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [openImageMode, setOpenImageModal] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
       AsyncStorage.getItem("id")
         .then((id) => {
           const parsedId = JSON.parse(id);
-          setPatientId(parsedId);
+          setDoctorId(parsedId);
         })
         .catch((error) => {
           console.log(error);
@@ -44,21 +42,27 @@ const Home = ({ navigation, route }) => {
       };
 
       getToken();
-    }, [patientId, token])
+    }, [doctorId, token])
   );
 
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
     },
   };
+
   useFocusEffect(
     React.useCallback(() => {
       axios
-        .get(`http://192.168.100.22:5000/api/v1/user1/find/${patientId}`, config)
+        .get(
+          `http://192.168.100.22:5000/api/v1/doctors/find/${doctorId}`,
+          config
+        )
         .then((response) => {
           setUsername(response.data.name);
           setImage(response.data.photo);
+          setEmail(response.data.email);
         })
         .catch((error) => {
           if (error.response) {
@@ -75,17 +79,72 @@ const Home = ({ navigation, route }) => {
             console.log("Error", error.message);
           }
         });
-    }, [patientId, token])
+    }, [doctorId, photo, username])
   );
+
+  const pickImages = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      alert("Sorry we need  media permission");
+    }
+    const options = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 3,
+    };
+    if (status === "granted") {
+      const response = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+      });
+
+      if (!response.canceled) {
+        const imageName = response.assets[0].uri.split("/").pop();
+        const imageType = response.assets[0].uri.split(".").pop();
+        const imageData = {
+          name: imageName,
+          uri: response.uri,
+          type: `image/${imageType}`,
+        };
+        setOpenImageModal(true);
+        setPhoto(imageData);
+      }
+    }
+  };
+
+  const updatePhoto = () => {
+    const formData = new FormData();
+    formData.append("photo", photo);
+    formData.append("email", email);
+    axios
+      .patch(
+        `http://192.168.100.22:5000/api/v1/doctors/update/${doctorId}`,
+        formData,
+        config
+      )
+      .then((response) => {
+        console.log(response.data);
+        setOpenImageModal(false);
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.log(error.response);
+        } else if (error.request) {
+          console.log(error.request);
+        } else {
+          console.log(error);
+        }
+      });
+  };
 
   const handleLogout = () => {
     AsyncStorage.clear();
-    dispatch(clearUserId());
     navigation.navigate("Login");
   };
+
   const currentDate = new Date();
   const dateString = currentDate.toISOString().slice(0, 10);
-
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: "row", height: 50 }}>
@@ -102,48 +161,39 @@ const Home = ({ navigation, route }) => {
         <Image
           style={styles.tinyLogo}
           source={{
-            uri: `http://192.168.100.22:5000/api/v1/user1/images/${image}`,
+            uri: `http://192.168.100.22:5000/api/v1/doctors/images/${image}`,
           }}
         />
+        <Button title="Pick an image from camera roll" onPress={pickImages} />
+        {openImageMode ? (
+          <View>
+            <Image
+              style={{ width: 50, height: 50 }}
+              source={{
+                uri: photo.uri,
+              }}
+            />
+            <Button title="Update image" onPress={updatePhoto} />
+          </View>
+        ) : (
+          ""
+        )}
         <Text style={{ fontSize: 20 }}>Welcome, {username}!</Text>
       </View>
       <View style={{ margin: 10, width: "90%" }}>
         <View style={{ display: "flex", flexDirection: "row" }}>
           <TouchableOpacity
             style={styles.item}
-            onPress={() => navigation.navigate("SearchDoctor")}>
-            <Text>Search doctor</Text>
+            onPress={() => navigation.navigate("DoctorToday")}>
+            <Text>Today's appointments</Text>
           </TouchableOpacity>
         </View>
+
         <View style={{ display: "flex", flexDirection: "row" }}>
           <TouchableOpacity
             style={styles.item}
-            onPress={() => navigation.navigate("LabTestBook")}>
-            <Text>Book lab test</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => navigation.navigate("Pharmacy")}>
-            <Text>Pharmacy</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ display: "flex", flexDirection: "row" }}>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => navigation.navigate("AllAppointments")}>
-            <Text>Appointment history</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => navigation.navigate("AllLabOrders")}>
-            <Text>Lab orders</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ display: "flex", flexDirection: "row" }}>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => navigation.navigate("AllPharmacyHistory")}>
-            <Text>Pharmacy history </Text>
+            onPress={() => navigation.navigate("DoctorAllBookings")}>
+            <Text>All Appointments </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item} onPress={() => handleLogout()}>
             <Text>Logout</Text>
@@ -182,4 +232,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default DoctorHome;
